@@ -1,0 +1,125 @@
+---
+title: "Rise or fall of programming languages"
+author: "Jason"
+date: "2022-11-01"
+output: html_document
+---
+## Introduction 
+This is my data analysis for stacked overflow data from 2008-2020. From this data one can deduce the most popular programming language used by developers based on the amount of questions asked. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Reading the csv file. 
+```{r}
+StackofData <- read_csv("/Users/ice50l/Downloads/Rise and Fall of Programming Languages/datasets/stack_overflow_data.csv")
+```
+
+Inspecting the Dataset/Converting fractions to percentages. 
+```{r}
+print(StackofData)
+r_percentage <- StackofData %>%
+  mutate(fraction = number / year_total*100)
+r_percentage
+```
+
+Viewing the data 
+```{r}
+View(StackofData)
+```
+
+Find the top 5 tags that were searched/asked from 2015-2020
+```{r}
+sorted_tags <- StackofData %>%
+  filter(year >= 2015) %>% 
+  group_by(tag) %>% 
+  summarize(tag_total = sum(number)) %>% 
+  arrange(desc(tag_total))
+sorted_tags
+highest_tags <- head(sorted_tags$tag, n = 5)
+highest_tags
+```
+
+Sorting the lowest searched/asked from 2015-2020
+```{r}
+sorted_tagsLOW <- StackofData %>%
+  filter(year >= 2015) %>% 
+  group_by(tag) %>% 
+  summarize(tag_total = sum(number)) %>% 
+  arrange((tag_total))
+sorted_tagsLOW
+
+LowestTags<- head(sorted_tagsLOW$tag, n = 5)
+LowestTags
+```
+
+
+Filtering highest/lowest searched/asked from 2015-2020
+```{r}
+by_tag_subset <- r_percentage %>% 
+  filter(tag %in% highest_tags, year >= 2015)
+
+LowTag <- r_percentage %>%
+  filter(tag %in% LowestTags, year >= 2015 )
+```
+
+
+Plotting tags 2015-2020 for highest tags. 
+```{r}
+# Plot tags over time on a line plot using color to represent tag
+ggplot(by_tag_subset, aes(x = year, y = fraction, color = tag)) +
+  geom_line() + labs(y = "Perecent of Total Question Asked")
+```
+
+Plotting percent of total questions asked from the total amount for selected programming languages (r, scala, python, java, sql)
+```{r}
+Sample <- c("r", "scala", "python", "java", "sql")
+SampleOT <- r_percentage %>%
+  filter(year >= 2015) %>%
+  filter(tag %in% Sample)
+
+#Plotting the sample over time.
+ggplot(SampleOT, aes(x = year, y = fraction, color = tag)) + geom_line() + labs(y = 'Percent of Total Questions Asked')
+```
+
+Plotting Android vs IOS questsions asked/searched from 2010-2020
+
+```{r}
+IDroid <- c('ios', 'android')
+tagIDroid <- r_percentage %>%
+  filter(tag %in% IDroid,year >= 2010)
+
+ggplot(tagIDroid, aes(x = year, y = fraction, color = tag)) + geom_line() + labs(y = 'Percent of Total Questions Asked')
+```   
+
+## Conclusions
+
+We can deduce that over the years 2015-2020, python has the most rapid growth out of every other programming language. While Javascript remaioned about costant over 5 years. Some langauges/OS such as Android has since fallen in question popularity in the 5 years. 
+
+1. We can conclude taht Python has the biggest growth out of any other tags.
+2. Java has fallen in popularity in 5 years, while scala, r, and sql over 2015-2020 make up approximately 1% of total questions asked on StackOverflow. 
+3. IOS has been lagging behind Android in questions asked over 2010-2020, IOS never has exceeded 2% of the total compared to Android, which has been hovering over 2% for many years. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
