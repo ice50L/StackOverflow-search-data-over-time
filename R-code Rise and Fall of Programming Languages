@@ -1,0 +1,68 @@
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Load dataset
+StackofData <- read_csv("/Users/ice50l/Downloads/Rise and Fall of Programming Languages/datasets/stack_overflow_data.csv")
+
+# Inspect the dataset
+print(StackofData)
+r_percentage <- StackofData %>%
+  mutate(fraction = number / year_total*100)
+r_percentage
+
+#Viewing the data
+View(StackofData)
+
+#Finding the top 5 tags that were searched from 2015-2020.
+sorted_tags <- StackofData %>%
+  filter(year >= 2015) %>% 
+  group_by(tag) %>% 
+  summarize(tag_total = sum(number)) %>% 
+  arrange(desc(tag_total))
+sorted_tags
+
+highest_tags <- head(sorted_tags$tag, n = 5)
+highest_tags
+
+#Sorting lowest searched
+sorted_tagsLOW <- StackofData %>%
+  filter(year >= 2015) %>% 
+  group_by(tag) %>% 
+  summarize(tag_total = sum(number)) %>% 
+  arrange((tag_total))
+sorted_tagsLOW
+
+LowestTags<- head(sorted_tagsLOW$tag, n = 5)
+LowestTags
+
+
+
+#Filtering highest tags percentage from 2015-2020
+by_tag_subset <- r_percentage %>% 
+  filter(tag %in% highest_tags, year >= 2015)
+
+#Filtering LOWEST tags percentage from 2015-2020
+LowTag <- r_percentage %>%
+  filter(tag %in% LowestTags, year >= 2015 )
+
+# Plot tags over time on a line plot using color to represent tag
+ggplot(by_tag_subset, aes(x = year, y = fraction, color = tag)) +
+  geom_line() + labs(y = "Perecent of Total Question Asked")
+
+# Sample selected languages
+Sample <- c("r", "scala", "python", "java", "sql")
+SampleOT <- r_percentage %>%
+  filter(year >= 2015) %>%
+  filter(tag %in% Sample)
+
+#Plotting the sample over time.
+ggplot(SampleOT, aes(x = year, y = fraction, color = tag)) + geom_line() + labs(y = 'Percent of Total Questions Asked')
+
+#Questions asked for Android vs. IOS
+IDroid <- c('ios', 'android')
+tagIDroid <- r_percentage %>%
+  filter(tag %in% IDroid,year >= 2010)
+
+#Plotting Apple vs Android 2010-2020
+ggplot(tagIDroid, aes(x = year, y = fraction, color = tag)) + geom_line() + labs(y = 'Percent of Total Questions Asked')
